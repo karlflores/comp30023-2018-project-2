@@ -78,7 +78,7 @@ int main()
     buf[bptr->length] = '\0';
 
     //Can print or parse value
-    printf("%s\n", buf);
+    printf("--%s--\n", buf);
 
     //*********************
     // End of Example code

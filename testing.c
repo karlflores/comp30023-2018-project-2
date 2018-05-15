@@ -1,3 +1,4 @@
+#define _POSIX_C_SOURCE 200112L
 #include <openssl/x509.h>
 #include <openssl/x509v3.h>
 #include <openssl/bio.h>
@@ -7,6 +8,8 @@
 #include <string.h>
 #include <time.h>
 
+#define TRUE 1
+#define FALSE 0
 
 
 int main(int argc, char **argv){
@@ -170,6 +173,115 @@ int main(int argc, char **argv){
 
   printf("%d\n",length);
 
+
+  // read in the extensions
+
+  X509_EXTENSION *ex = X509_get_ext(cert, X509_get_ext_by_NID(cert, NID_ext_key_usage, -1));
+  ASN1_OBJECT *obj = X509_EXTENSION_get_object(ex);
+
+  char buff[1024];
+  OBJ_obj2txt(buff, 1024, obj, 0);
+  printf("CA: %s -- \n", buff);
+
+  BUF_MEM *bptr = NULL;
+  char *buf = NULL;
+
+  BIO *bio = BIO_new(BIO_s_mem());
+  if (!X509V3_EXT_print(bio, ex, 0, 0))
+  {
+      fprintf(stderr, "Error in reading extensions");
+  }
+  printf("GOT HERE\n");
+  BIO_flush(bio);
+  BIO_get_mem_ptr(bio, &bptr);
+  //bptr->data is not NULL terminated - add null character
+  buf = (char *)malloc((bptr->length + 1) * sizeof(char));
+  memcpy(buf, bptr->data, bptr->length);
+  buf[bptr->length] = '\0';
+  printf("GOT HERE\n");
+  //Can print or parse value
+  printf("--%s--\n", buf);
+
+  // compare the certificate basic constraint with TLS Web Server Authentication
+  if(strstr(buf, "TLS Web Server Authentication") != NULL){
+      free(buf);
+      printf("USAGE IS GOOD\n");
+  }else{
+      free(buf);
+      printf("USAGE IS NOT GOOD\n");
+  }
+
+  // read in the extensions
+
+  ex = X509_get_ext(cert, X509_get_ext_by_NID(cert, NID_subject_alt_name, -1));
+  obj = X509_EXTENSION_get_object(ex);
+
+  OBJ_obj2txt(buff, 1024, obj, 0);
+  printf("CA: %s -- \n", buff);
+
+
+  bio = BIO_new(BIO_s_mem());
+  if (!X509V3_EXT_print(bio, ex, 0, 0))
+  {
+      fprintf(stderr, "Error in reading extensions");
+  }
+  printf("GOT HERE\n");
+  BIO_flush(bio);
+  BIO_get_mem_ptr(bio, &bptr);
+  //bptr->data is not NULL terminated - add null character
+  buf = (char *)malloc((bptr->length + 1) * sizeof(char));
+  memcpy(buf, bptr->data, bptr->length);
+  buf[bptr->length] = '\0';
+  printf("GOT HERE\n");
+  //Can print or parse value
+  printf("--%s--\n", buf);
+
+  // compare the certificate basic constraint with TLS Web Server Authentication
+  if(strstr(buf, "TLS Web Server Authentication") != NULL){
+      //free(buf);
+      printf("USAGE IS GOOD\n");
+  }else{
+      //free(buf);
+      printf("USAGE IS NOT GOOD\n");
+  }
+
+  int token_index = 0;
+  char separator[3] = ", ";
+  char *token_SAN;
+  char *save_SAN;
+  int result;
+  char url[256] = "www.google.com";
+  token_SAN = strtok_r(buf,separator, &save_SAN);
+  // iterate through all the DNS in the SAN
+
+  // now set the equivalent flag to FALSE -- if we come across a domain
+  // name that is equivalent, then we can change the flag to TRUE
+  // we just need to return the flag
+  int equivalent = FALSE;
+
+  while(token_SAN!= NULL){
+      // reset the buffer
+      memset(buff,0,256);
+      // copy in the token into the buffer
+      strcpy(buff,token_SAN);
+
+      // now the first 4 characters are always DNS:
+      // therefore we can skip over these 4
+      char *san = buff+strlen("DNS:");
+
+      // now *san should point to the portion of the buffer that contains the DNS path
+
+      // the DNS path can be in the form www.*, *.example.com, example.com
+      // first try a strcmp
+
+      if(strcmp(san,url) == 0){
+          // then it is an exact match -- hence we can return true
+          equivalent = TRUE;
+      }
+      token_SAN = strtok_r(NULL,separator, &save_SAN);
+      printf("DNS: %s\n",san);
+  }
+  printf("%s is %d\n",url,equivalent);
 
   X509_free(cert);
   BIO_free_all(certificate_bio);

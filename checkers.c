@@ -167,6 +167,161 @@ int check_pubkey_length(X509 *cert){
 }
 
 // validate the the pubkey extensions
-int check_pubkey_ext(X509 *cert){
+int check_basic_constraints(X509 *cert){
+    // read in the extensions
+    // get the location of the basic constrains extensions
+    int bc_loc = X509_get_ext_by_NID(cert, NID_basic_constraints, -1);
+    if(bc_loc < 0){
+        fprintf(stderr,"ERROR: Can't locate Basic Constraints in Certificate\n");
+        exit(EXIT_FAILURE);
+    }
+    // get the string representing this extension
+    char *bc = get_key_extensions(cert,bc_loc);
+    if(bc == NULL){
+        fprintf(stderr,"ERROR: Can't locate Basic Constraints in Certificate\n");
+        exit(EXIT_FAILURE);
+    }
+    // compare the certificate basic constraint with CA:FALSE
+    if(strcpy(bc,"CA:FALSE") == 0){
+        free(bc);
+        return TRUE;
+    }else{
+        free(bc);
+        return FALSE;
+    }
 
+}
+
+// che
+int check_ext_key_usage(X509 *cert){
+    // read in the extensions
+    // get the location of the basic constrains extensions
+    int ku_loc = X509_get_ext_by_NID(cert, NID_key_usage, -1);
+    if(ku_loc < 0){
+        fprintf(stderr,"ERROR: Can't locate Basic Constraints in Certificate\n");
+        exit(EXIT_FAILURE);
+    }
+    // get the string representing this extension
+    char *ku = get_key_extensions(cert,ku_loc);
+    if(bc == NULL){
+        fprintf(stderr,"ERROR: Can't locate Basic Constraints in Certificate\n");
+        exit(EXIT_FAILURE);
+    }
+    // compare the certificate basic constraint with TLS Web Server Authentication
+    if(strstr(ku, "TLS Web Server Authentication") != NULL){
+        free(ku);
+        return TRUE;
+    }else{
+        free(ku);
+        return FALSE;
+    }
+}
+
+// returns allocated memory containing a string of the relevant extension field
+char *get_key_extensions(X509 *cert, int location){
+
+    X509_EXTENSION *extension = X509_get_ext(cert, location);
+
+    //assert extension
+    if(extension == NULL){
+        fprintf(stderr,"ERROR: Can't locate Key Extension in Certificate\n");
+
+        return NULL;
+    }
+
+    // get the Basic Constraint value
+
+    BUF_MEM *bc_ptr = NULL;
+    char *bc = NULL;
+
+    BIO *bio = BIO_new(BIO_s_mem());
+    if (!X509V3_EXT_print(bio, extension, 0, 0)){
+        fprintf(stderr, "ERROR: Unable to read in Key Extension\n");
+        return NULL;
+    }
+
+    BIO_flush(bio);
+    BIO_get_mem_ptr(bio, &bc_ptr);
+
+    // allocate memory for the buffer
+    bc = (char *)malloc((bc_ptr->length + 1) * sizeof(char));
+
+    // copy the string and add the null character to the end
+    memcpy(bc, bc_ptr->data, bc_ptr->length);
+    bc[bc_ptr->length] = '\0';
+
+    // return the final value
+    return bc;
+
+}
+
+// This function checks the url with the subject alternative names in the certificate -- it iterates through all of them, checking for equivalence. It also is able to handle wildcards to the RFC4985 standard
+int check_SAN(X509 *cert, const char *url){
+    // read in the extensions
+    // get the location of the subject alternative names
+    int SAN_loc = X509_get_ext_by_NID(cert, NID_subject_alt_name, -1);
+    if(SAN_loc < 0){
+        fprintf(stderr,"ERROR: Can't locate Basic Constraints in Certificate\n");
+        exit(EXIT_FAILURE);
+    }
+    // get the string representing this extension
+    char *SAN = get_key_extensions(cert,SAN_loc);
+    if(SAN == NULL){
+        fprintf(stderr,"ERROR: Can't locate Basic Constraints in Certificate\n");
+        exit(EXIT_FAILURE);
+    }
+    // now we need to tokenise the subject alternative name
+    // get the first token of both the url and the wildcard
+    int token_index = 0;
+    char separator[3] = ", ";
+    char *token_SAN;
+    char *save_SAN;
+    int result;
+
+    token_SAN = strtok_r(SAN,separator, &save_SAN);
+    char buff[BUFFSZ];
+    // iterate through all the DNS in the SAN
+
+    // now set the equivalent flag to FALSE -- if we come across a domain
+    // name that is equivalent, then we can change the flag to TRUE
+    // we just need to return the flag
+    int equivalent = FALSE;
+
+    while(token_SAN!= NULL){
+        // reset the buffer
+        memset(buff,0,BUFFSZ);
+        // copy in the token into the buffer
+        strcpy(buff,token_SAN);
+
+        // now the first 4 characters are always DNS:
+        // therefore we can skip over these 4
+        char *san = buff+strlen("DNS:");
+
+        // now *san should point to the portion of the buffer that contains the DNS path
+
+        // the DNS path can be in the form www.*, *.example.com, example.com
+        // first try a strcmp
+
+        if(strcmp(san,url) == 0){
+            // then it is an exact match -- hence we can return true
+            equivalent = TRUE;
+        }else{
+            // need to check whether the san is a wildcard
+            if(is_wildcard(san)){
+                // see if the san (wildcard) is equivalent to the test url
+                if(comp_wildcard(san,url)){
+                    equivalent = TRUE;
+
+                    // no use to checking the rest of the list -- therefore we can break out of the loop once we find a match
+                    break;
+                }
+
+            }
+        }
+        token_SAN = strtok_r(NULL,separator, &save_SAN);
+        printf("DNS: %s\n",token_SAN);
+    }
+
+    // if we have found an equivalent DNS then the flag would have been changed
+    return equivalent;
 }
