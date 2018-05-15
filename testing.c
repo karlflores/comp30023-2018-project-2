@@ -136,7 +136,7 @@ int main(int argc, char **argv){
 
 
   // get the domain name in the common name
-  
+
   cert_issuer = X509_get_issuer_name(cert);
   char issuer_cn[256] = "Issuer CN NOT FOUND";
   X509_NAME_get_text_by_NID(cert_issuer, NID_commonName, issuer_cn, 256);
@@ -149,6 +149,27 @@ int main(int argc, char **argv){
 
 
   // convert the time values to time structs that we can use
+
+
+  // get the X509_PUBKEY
+  X509_PUBKEY *key;
+
+  key = X509_get_X509_PUBKEY(cert);
+
+  // get the public key from key
+
+  EVP_PKEY *pubkey;
+  pubkey = X509_PUBKEY_get(key);
+
+  RSA *ppk;
+  ppk = EVP_PKEY_get1_RSA(pubkey);
+
+  //get the length
+
+  int length = RSA_size(ppk);
+
+  printf("%d\n",length);
+
 
   X509_free(cert);
   BIO_free_all(certificate_bio);
