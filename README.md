@@ -1,4 +1,3 @@
- Certificate Checking
+# Certificate Checking
 
- * Basic certificate checking
- * sdlkfjsdlkjf
+* Basic certificate checking
