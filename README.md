@@ -2,19 +2,19 @@
 
 ### This program implements basic SSL certificate checking using openSSL libraries in C.
 ```
-    usage: ./certcheck [path_to_input_file]
+usage: ./certcheck [path_to_input_file]
 ```
 
 The input file must be in the form of a csv file with following format:
 ```
-    example_cert.crt,url_to_test
+example_cert.crt,url_to_test
 ```
 
 The program produces an file which contains the output of each certificate tested in the form of a csv file "output.csv" formatted as such:
 ```
-    example_cert.crt,url_to_test,validity
+example_cert.crt,url_to_test,validity
 
-    [validity: 1 = Valid Certificate , 0 = Invalid Certificate]
+[validity: 1 = Valid Certificate , 0 = Invalid Certificate]
 ```
 
 #### The following fields are validated:
