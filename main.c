@@ -6,15 +6,21 @@
 
 #define ARGC_SIZE 2
 
+
+/*
+* Main function -- implement the command line input
+*/
 int main(int argc, char **argv){
+    // assert the command line arguments
     if(argc != ARGC_SIZE){
         fprintf(stdout, "usage: ./certcheck [pathToTestFile]\n");
         exit(EXIT_FAILURE);
     }
+
     // get the filepath of the input file from the input
     char file_path[BUFFSZ];
     strcpy(file_path, argv[1]);
-    printf("INPUT: %s\n",file_path);
+    // printf("INPUT: %s\n",file_path);
 
     // now process the input
     if(process_certificate_input(file_path) < 0){

@@ -1,11 +1,12 @@
 #include "certificates.h"
 
+// Function to verify the certificate and the url against the required fields
 int verify_certificate(const char *cert_path, const char *url){
 
     BIO *certificate_bio = NULL;
     X509 *cert = NULL;
 
-    STACK_OF(X509_EXTENSION) * ext_list;
+    // STACK_OF(X509_EXTENSION) * ext_list;
 
     //initialise openSSL
     OpenSSL_add_all_algorithms();
@@ -32,50 +33,54 @@ int verify_certificate(const char *cert_path, const char *url){
     // step through each of the checkers
     if(check_not_before(cert) == FALSE){
         authenticated = FALSE;
-        printf("NOT BEFORE: FALSE\n");
+        // printf("NOT BEFORE: FALSE\n");
     }else{
-        printf("NOT BEFORE: TRUE\n");
+        // printf("NOT BEFORE: TRUE\n");
     }
     if(check_not_after(cert) == FALSE){
         authenticated = FALSE;
-        printf("NOT AFTER: FALSE\n");
+        // printf("NOT AFTER: FALSE\n");
     }else{
-        printf("NOT AFTER: TRUE\n");
+        // printf("NOT AFTER: TRUE\n");
     }
 
     if(!check_common_name(cert, url)){
         authenticated = FALSE;
-        printf("CN: FALSE\n");
+        // printf("CN: FALSE\n");
     }else{
-        printf("CN: TRUE\n");
+        // printf("CN: TRUE\n");
     }
 
     if(!check_pubkey_length(cert)){
         authenticated = FALSE;
-        printf("PUBKEY LEN: FALSE\n");
+        // printf("PUBKEY LEN: FALSE\n");
     }else{
-        printf("PUBKEY LEN: TRUE\n");
+        // printf("PUBKEY LEN: TRUE\n");
     }
 
     if(!check_ext_key_usage(cert)){
         authenticated = FALSE;
-        printf("EXT KEY USAGE: FALSE\n");
+        // printf("EXT KEY USAGE: FALSE\n");
     }else{
-        printf("EXT KEY USAGE: TRUE\n");
+        // printf("EXT KEY USAGE: TRUE\n");
     }
 
     if(check_basic_constraints(cert) == FALSE){
         authenticated = FALSE;
-        printf("KEY BASIC CONSTRAINTS: FALSE\n");
+        // printf("KEY BASIC CONSTRAINTS: FALSE\n");
     }else{
-        printf("KEY BASIC CONSTRAINTS: TRUE\n");
+        // printf("KEY BASIC CONSTRAINTS: TRUE\n");
     }
 
 
-    // if the certificate is autheticated, therefore all the tests above would have been true
+    // if the certificate is autheticated, therefore all the tests
+    // above would have been true
+    X509_free(cert);
+    BIO_free_all(certificate_bio);
     return authenticated;
 }
 
+// process the whole input file
 int process_certificate_input(const char *input_path){
     // create the output file
     FILE *output = fopen("output.csv","w");
@@ -91,16 +96,18 @@ int process_certificate_input(const char *input_path){
         return FAILURE;
     }
 
-    // need to process the input file to see if it is within another folder -- if it is, we must get that path to the folder
-    char *absolute = (char*)malloc(sizeof(char)*BUFFSZ);
-    if(absolute == NULL){
+    // need to process the input file to see if it is within another
+    // folder -- if it is, we must get that path to the folder
+    char *base_path= (char*)malloc(sizeof(char)*BUFFSZ);
+    if(base_path== NULL){
         fprintf(stderr,"ERROR: Can't allocate memory\n");
         exit(EXIT_FAILURE);
     }
 
     if(strstr(input_path,"/")==NULL){
-        // then we are opening a file in the directory that we are in currently. Therefore we don't need to reconstruct a path,
-        absolute = NULL;
+        // then we are opening a file in the directory that we are in
+        //currently. Therefore we don't need to reconstruct a path,
+        base_path= NULL;
 
     }else{
         // need to process the input_path
@@ -116,7 +123,7 @@ int process_certificate_input(const char *input_path){
         strcpy(absolute,tk);
 
     }
-    printf("ABSOLUTE: %s\n",absolute);
+    // printf("ABSOLUTE: %s\n",absolute);
     // process each input until the file ends
     char buffer[BUFFSZ];
     char cert_path[BUFFSZ];
@@ -136,10 +143,10 @@ int process_certificate_input(const char *input_path){
         token = strtok_r(NULL,delim,&save);
         strcpy(url,token);
 
-        printf("CERT PATH: %s\nURL: %s\n",cert_path,url);
+        // printf("CERT PATH: %s\nURL: %s\n",cert_path,url);
         // check the certificate
 
-        if(absolute == NULL){
+        if(base_path== NULL){
             autheticated = verify_certificate(cert_path, url);
         }else{
             char *cert_full_path = reconstruct_full_path(absolute,cert_path);
@@ -153,45 +160,12 @@ int process_certificate_input(const char *input_path){
         memset(cert_path,0,BUFFSZ);
         memset(url,0,BUFFSZ);
         memset(buffer,0,BUFFSZ);
-        printf("\n");
+        // printf("\n");
     }
 
     fclose(input);
     fclose(output);
-    printf("FINIShED\n");
+    // printf("FINIShED\n");
     return SUCCESS;
 
-}
-
-// reconstruct a full path from the absolute and the relative paths
-char *reconstruct_full_path(const char *absolute, const char *relative_path){
-    // get the size of the full path
-    int length = 0;
-    // add 1 due to the additon of the '/'
-    length = strlen(absolute) + strlen(relative_path) + 1;
-
-    //allocate memory
-    char *result = (char*)malloc(sizeof(char)*(length+1));
-    memset(result,0,length+1);
-
-    int i = 0;
-    int result_i = 0;
-    // add the absolute path to the result string
-    while(absolute[i] != '\0'){
-        result[result_i++] = absolute[i++];
-    }
-
-    // add the delimiter to the path
-    result[result_i++] = '/';
-
-    // add the relative path to the result string
-    i = 0;
-    while(result[i] != '\0'){
-        result[result_i++] = relative_path[i++];
-    }
-
-    // null-byte terminate the result string
-    result[result_i] = '\0';
-
-    return result;
 }

@@ -1,4 +1,5 @@
 #include "wildcards.h"
+
 /*
 * We assume that the certificates are valid and the wildcards are always
 * Such that the wild card only occurs in the first entry:
@@ -10,7 +11,7 @@
 * www.example.com but not example.com
 */
 
-// compare a wild-card url to a url
+// compares a url to a wildcard-url and returns if they are equivalent or not
 int comp_wildcard(const char *wildcard, const char *url){
     // copy the wildcard and url
     char wildcard_copy[BUFFSZ];
@@ -168,20 +169,6 @@ int is_wildcard(const char *url){
 
     // if we get down here, therefore the URL is not a wildcard
     return FALSE;
-}
-
-// count the number of periods in a url
-int count_period(const char *url){
-    int num = 0;
-
-    for(int i = 0; i < strlen(url); i++){
-        // count the number of periods
-        if(url[i] == '.'){
-            num++;
-        }
-    }
-    // return the number of periods
-    return num;
 }
 
 // compare the token -- the portion before the asterisk

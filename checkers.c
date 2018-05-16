@@ -1,7 +1,7 @@
 #include "checkers.h"
 
 int check_not_after(X509 *cert){
-    BIO *b = BIO_new_fp(stdout, BIO_NOCLOSE);
+    // BIO *b = BIO_new_fp(stdout, BIO_NOCLOSE);
     // access the the current system time values:
     time_t rawtime;
     // get the current time
@@ -11,9 +11,9 @@ int check_not_after(X509 *cert){
     ASN1_TIME *not_after_time;
 
     not_after_time = X509_get_notAfter(cert);
-    printf("NOT AFTER TIME \n");
-    ASN1_TIME_print(b,not_after_time);
-    printf("\n");
+    // printf("NOT AFTER TIME \n");
+    // ASN1_TIME_print(b,not_after_time);
+    // printf("\n");
     // error checking
     if(not_after_time == NULL){
         fprintf(stderr,"ERROR: Can't access Not After Time Field\n");
@@ -25,12 +25,12 @@ int check_not_after(X509 *cert){
 
     // first argument to NULL -- we want ASN1_TIME_set to return an allocated block of memory
     system_time = ASN1_TIME_set(NULL, rawtime);
-    ASN1_TIME_print(b,system_time);
-    printf("\n");
+    // ASN1_TIME_print(b,system_time);
+    // printf("\n");
     // compare the system time and the after time
     // return 1 -- if
     int comp = compare_ASN1_TIMES(not_after_time, system_time);
-    printf("COMPARE: %d\n",comp);
+    // printf("COMPARE: %d\n",comp);
     // free the resources that have been allocated
     free(system_time);
 
@@ -46,7 +46,7 @@ int check_not_after(X509 *cert){
 }
 
 int check_not_before(X509 *cert){
-    BIO *b = BIO_new_fp(stdout, BIO_NOCLOSE);
+    // BIO *b = BIO_new_fp(stdout, BIO_NOCLOSE);
     // access the the current system time values:
     time_t rawtime;
     // get the current time
@@ -55,9 +55,9 @@ int check_not_before(X509 *cert){
     // convert notBefore field time to ASN1_TIME structure
     ASN1_TIME *not_before_time;
     not_before_time = X509_get_notBefore(cert);
-    printf("\nNOT BEFORE TIME \n");
-    ASN1_TIME_print(b,not_before_time);
-    printf("\n");
+    // printf("\nNOT BEFORE TIME \n");
+    // ASN1_TIME_print(b,not_before_time);
+    // printf("\n");
     // error checking
     if(not_before_time == NULL){
         fprintf(stderr,"ERROR: Can't access Not Before Time Field\n");
@@ -70,12 +70,12 @@ int check_not_before(X509 *cert){
     // first argument to NULL -- we want ASN1_TIME_set to return an allocated block of memory
 
     system_time = ASN1_TIME_set(NULL, rawtime);
-    ASN1_TIME_print(b,system_time);
-    printf("\n");
+    // ASN1_TIME_print(b,system_time);
+    // printf("\n");
     // compare the system time and the before time
     // return 1 -- if
     int comp = compare_ASN1_TIMES(not_before_time, system_time);
-    printf("COMPARE: %d\n",comp);
+    // printf("COMPARE: %d\n",comp);
     // free the resources that have been allocated
     free(system_time);
 
@@ -90,44 +90,6 @@ int check_not_before(X509 *cert){
     }
 }
 
-// compare the from date
-int compare_ASN1_TIMES(ASN1_TIME *from, ASN1_TIME *to){
-
-    int comp_day, comp_sec;
-
-    if(!ASN1_TIME_diff(&comp_day, &comp_sec, from, to)){
-        fprintf(stderr,"ERROR: Time is not in correct ASN1 time format\n");
-        exit(EXIT_FAILURE);
-    }
-
-    // if we get here, we can begin to check the day and sec values
-    // if the day difference is negative, then the current day is
-    // later than the cert before time then day is > 0
-
-    if(comp_day > 0 && comp_sec > 0){
-        // then to time > from time
-        // printf("CERT DATE BEFORE\n");
-        return LATER_TIME;
-    }else if(comp_day < 0 && comp_sec < 0){
-        // then to time < from time
-        // printf("CERT DATE AFTER\n");
-        return EARLIER_TIME;
-    }else if(comp_day == 0 && comp_sec > 0){
-        // then to time > from time
-        // printf("CERT DATE BEFORE\n");
-        return LATER_TIME;
-    }else if(comp_day == 0 && comp_sec < 0){
-        // then too time < from time
-        // printf("CERT DATE AFTER\n");
-        return EARLIER_TIME;
-    }else{
-        // same time
-        // printf("SAME DAY\n");
-        return SAME_TIME;
-    }
-
-}
-
 // CHECK COMMON NAME
 int check_common_name(X509 *cert, const char *url){
     // check the common name with supplied url
@@ -138,12 +100,12 @@ int check_common_name(X509 *cert, const char *url){
 
     if(cert_subjects == NULL){
         fprintf(stderr, "ERROR: Can't Gen Subject Fields\n");
-        exit(EXIT_FAILURE);
+        return FALSE;
     }
 
     // retrieve the common name
     X509_NAME_get_text_by_NID(cert_subjects, NID_commonName, subject_cn, BUFFSZ);
-    printf("COMMON NAME: %s\n",subject_cn);
+    // printf("COMMON NAME: %s\n",subject_cn);
     // need to test whether the subject name matches the testing url.
 
     // first try a strcmp
@@ -202,16 +164,16 @@ int check_basic_constraints(X509 *cert){
     int bc_loc = X509_get_ext_by_NID(cert, NID_basic_constraints, -1);
     if(bc_loc < 0){
         fprintf(stderr,"ERROR: Can't locate Basic Constraints in Certificate\n");
-        return ERROR;
+        return FALSE;
     }
     // get the string representing this extension
     char *bc = get_extension_str(cert,bc_loc);
-    printf("THIS CERT BC: %s\n",bc);
+    // printf("THIS CERT BC: %s\n",bc);
 
 
     if(bc == NULL){
         fprintf(stderr,"ERROR: Can't locate Basic Constraints in Certificate\n");
-        return ERROR;
+        return FALSE;
     }
 
     // compare the certificate basic constraint with CA:FALSE
@@ -232,13 +194,13 @@ int check_ext_key_usage(X509 *cert){
     int ku_loc = X509_get_ext_by_NID(cert, NID_ext_key_usage, -1);
     if(ku_loc < 0){
         fprintf(stderr,"ERROR: Can't locate Basic Constraints in Certificate\n");
-        exit(EXIT_FAILURE);
+        return FALSE;
     }
     // get the string representing this extension
     char *ku = get_extension_str(cert,ku_loc);
     if(ku == NULL){
         fprintf(stderr,"ERROR: Can't locate Basic Constraints in Certificate\n");
-        exit(EXIT_FAILURE);
+        return FALSE;
     }
     // compare the certificate basic constraint with TLS Web Server Authentication
     if(strstr(ku, "TLS Web Server Authentication") != NULL){
@@ -283,7 +245,7 @@ char *get_extension_str(X509 *cert, int location){
     bc[bc_ptr->length] = '\0';
 
     // return the final value
-    printf("EXTENSIONS: %s \n",bc);
+    // printf("EXTENSIONS: %s \n",bc);
     return bc;
 
 }
@@ -294,13 +256,13 @@ int check_SAN(X509 *cert, const char *url){
     // get the location of the subject alternative names
     int SAN_loc = X509_get_ext_by_NID(cert, NID_subject_alt_name, -1);
     if(SAN_loc < 0){
-        fprintf(stderr,"ERROR: Can't locate Basic Constraints in Certificate\n");
+        fprintf(stderr,"ERROR: Can't locate Subject Alternative Name in Certificate\n");
         return FALSE;
     }
     // get the string representing this extension
     char *SAN = get_extension_str(cert,SAN_loc);
     if(SAN == NULL){
-        fprintf(stderr,"ERROR: Can't locate Basic Constraints in Certificate\n");
+        fprintf(stderr,"ERROR: Can't load Subject Alternative Name as string\n");
         return FALSE;
     }
     // now we need to tokenise the subject alternative name
