@@ -78,7 +78,8 @@ int verify_certificate(const char *cert_path, const char *url){
 
 int process_certificate_input(const char *input_path){
     // create the output file
-    FILE *output = fopen("output.txt","w");
+    FILE *output = fopen("output.csv","w");
+
     if(output == NULL){
         fprintf(stderr,"ERROR: Can't create output.txt\n");
         return FAILURE;
@@ -146,7 +147,7 @@ int process_certificate_input(const char *input_path){
         }
 
         //write result to the output
-        fprintf(stdout,"%s,%s,%d\n",cert_path,url,autheticated);
+        fprintf(output,"%s,%s,%d\n",cert_path,url,autheticated);
 
         // reset the buffers before we read a new line
         memset(cert_path,0,BUFFSZ);
@@ -157,6 +158,7 @@ int process_certificate_input(const char *input_path){
 
     fclose(input);
     fclose(output);
+    printf("FINIShED\n");
     return SUCCESS;
 
 }

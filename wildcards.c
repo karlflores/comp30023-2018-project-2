@@ -31,7 +31,7 @@ int comp_wildcard(const char *wildcard, const char *url){
     // if they do not contain the same number of periods, therefore, they
     // are not equivalent
     if(wc_periods != url_periods){
-        printf("WHY IS THIS FALSE\n");
+        // printf("WHY IS THIS FALSE\n");
         return FALSE;
     }
 
@@ -48,8 +48,8 @@ int comp_wildcard(const char *wildcard, const char *url){
     token_wc = strtok_r(wildcard_copy, separator, &save_wc);
     token_url = strtok_r(url_copy, separator, &save_url);
 
-    printf("----------------------\n");
-    printf("%s %s\n",token_wc, token_url);
+    // printf("----------------------\n");
+    // printf("%s %s\n",token_wc, token_url);
 
     // are the two paths equivalent -- assume this to be true at first
     int equivalent = TRUE;
@@ -73,7 +73,7 @@ int comp_wildcard(const char *wildcard, const char *url){
             // case 1 -- *. -- therefore always return true
             if(strcmp(token_wc,"*") == 0){
                 equivalent = TRUE;
-                printf("%s %s\n",token_wc, token_url);
+                // printf("%s %s\n",token_wc, token_url);
             }else{
                 // need to check if it is in the form *f, f* or f*b
                 if(token_wc[0] == '*'){
@@ -132,7 +132,7 @@ int comp_wildcard(const char *wildcard, const char *url){
         // get the next tokens
         token_wc = strtok_r(NULL, separator, &save_wc);
         token_url = strtok_r(NULL, separator, &save_url);
-        printf("%s %s\n",token_wc, token_url);
+        // printf("%s %s\n",token_wc, token_url);
         token_index++;
     }
 

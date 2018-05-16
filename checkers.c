@@ -147,6 +147,8 @@ int check_common_name(X509 *cert, const char *url){
     // need to test whether the subject name matches the testing url.
 
     // first try a strcmp
+    int authenticated = FALSE;
+
     if(strcmp(subject_cn,url) == 0){
         // then it is an exact match -- hence we can return true
         return TRUE;
@@ -157,13 +159,20 @@ int check_common_name(X509 *cert, const char *url){
             // the subject cn is a wild card
 
             // return the comparison value between the subject_CN and the tested URL
-            return comp_wildcard(subject_cn,url);
+            authenticated = comp_wildcard(subject_cn,url);
+            if(authenticated == FALSE){
+                authenticated = check_SAN(cert,url);
+            }
 
         }else{
             // if it is not a wild card -- then the CN does not match
-            return FALSE;
+            // we then need to check the SAN
+            //return FALSE;
+            authenticated = check_SAN(cert,url);
         }
     }
+
+    return authenticated;
 }
 
 // check the minimum pubkey length
@@ -286,13 +295,13 @@ int check_SAN(X509 *cert, const char *url){
     int SAN_loc = X509_get_ext_by_NID(cert, NID_subject_alt_name, -1);
     if(SAN_loc < 0){
         fprintf(stderr,"ERROR: Can't locate Basic Constraints in Certificate\n");
-        return ERROR;
+        return FALSE;
     }
     // get the string representing this extension
     char *SAN = get_extension_str(cert,SAN_loc);
     if(SAN == NULL){
         fprintf(stderr,"ERROR: Can't locate Basic Constraints in Certificate\n");
-        return ERROR;
+        return FALSE;
     }
     // now we need to tokenise the subject alternative name
     // get the first token of both the url and the wildcard
@@ -340,7 +349,7 @@ int check_SAN(X509 *cert, const char *url){
             }
         }
         token_SAN = strtok_r(NULL,separator, &save_SAN);
-        printf("DNS: %s\n",token_SAN);
+        // printf("DNS: %s\n",token_SAN);
     }
 
     free(SAN);
