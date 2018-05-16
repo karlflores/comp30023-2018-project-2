@@ -18,6 +18,7 @@
 #define MAXBUFFSZ 1024
 #define TRUE 1
 #define FALSE 0
+#define ERROR -1
 #define BYTE_TO_BITS 8
 #define MIN_PUBKEY_LENGTH 2048
 
@@ -42,6 +43,6 @@ int check_basic_constraints(X509 *cert);
 
 int check_ext_key_usage(X509 *cert);
 
-char *get_key_extensions(X509 *cert, int location);
+char *get_extension_str(X509 *cert, int location);
 
 int check_SAN(X509 *cert, const char *url);

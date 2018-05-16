@@ -38,7 +38,6 @@ int comp_wildcard(const char *wildcard, const char *url){
     // get the first token of both the url and the wildcard
     int token_index = 0;
     char separator[2] = ".";
-    char wc[2] = "*";
     char *token_wc;
     char *save_wc;
     char *save_url;
@@ -148,8 +147,8 @@ int is_wildcard(const char *url){
     // copy the url
     char url_copy[BUFFSZ];
     strcpy(url_copy,url);
-    // check what index the wildcard is at
-    int index = -1;
+
+
     char separator[2] = ".";
     char wc[2] = "*";
     char *save_wc;
