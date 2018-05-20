@@ -107,6 +107,9 @@ int process_certificate_input(const char *input_path){
     if(strstr(input_path,"/")==NULL){
         // then we are opening a file in the directory that we are in
         //currently. Therefore we don't need to reconstruct a path,
+        //free(base_path);
+
+        // set the path to NULL
         base_path= NULL;
 
     }else{
@@ -120,10 +123,10 @@ int process_certificate_input(const char *input_path){
         char *sv;
         // first is the aboslute path
         tk = strtok_r(temp,"/",&sv);
-        strcpy(absolute,tk);
+        strcpy(base_path,tk);
 
     }
-    // printf("ABSOLUTE: %s\n",absolute);
+    // printf("base_path: %s\n",base_path);
     // process each input until the file ends
     char buffer[BUFFSZ];
     char cert_path[BUFFSZ];
@@ -132,6 +135,7 @@ int process_certificate_input(const char *input_path){
     char *token;
     char *save;
     char delim[2] = ",";
+    char *cert_full_path;
     while(fscanf(input, "%s\n",buffer) != EOF){
         // tokenise the input
         token = strtok_r(buffer,delim,&save);
@@ -149,8 +153,11 @@ int process_certificate_input(const char *input_path){
         if(base_path== NULL){
             autheticated = verify_certificate(cert_path, url);
         }else{
-            char *cert_full_path = reconstruct_full_path(absolute,cert_path);
+            cert_full_path = reconstruct_full_path(base_path,cert_path);
             autheticated = verify_certificate(cert_full_path, url);
+
+            // free the path once we are done with it
+            // free(cert_full_path);
         }
 
         //write result to the output

@@ -1,21 +1,26 @@
 #include "helpers.h"
 
 // reconstruct a full path from the base_path and the relative paths
-char *reconstruct_full_path(const char *absolute, const char *relative_path){
+char *reconstruct_full_path(const char *base_path, const char *relative_path){
     // get the size of the full path
     int length = 0;
     // add 1 due to the additon of the '/'
-    length = strlen(absolute) + strlen(relative_path) + 1;
+    length = strlen(base_path) + strlen(relative_path) + 1;
 
     //allocate memory
     char *result = (char*)malloc(sizeof(char)*(length+1));
+    if(result == NULL){
+        fprintf(stderr,"ERROR: Could not allocate memory for full path\n");
+        return NULL;
+    }
+    // clear the bits in the allocated memory space
     memset(result,0,length+1);
 
     int i = 0;
     int result_i = 0;
     // add the base_pathpath to the result string
-    while(absolute[i] != '\0'){
-        result[result_i++] = absolute[i++];
+    while(base_path[i] != '\0'){
+        result[result_i++] = base_path[i++];
     }
 
     // add the delimiter to the path

@@ -19,3 +19,5 @@ testing.c
 sample_certs
 *.pem
 *.json
+certcheck
+test_wildcard

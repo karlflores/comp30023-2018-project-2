@@ -239,7 +239,10 @@ char *get_extension_str(X509 *cert, int location){
 
     // allocate memory for the buffer
     bc = (char *)malloc((bc_ptr->length + 1) * sizeof(char));
-
+    if(bc == NULL){
+        fprintf(stderr,"ERROR: Could not allocate memory for Basic Constraints\n");
+        return NULL;
+    }
     // copy the string and add the null character to the end
     memcpy(bc, bc_ptr->data, bc_ptr->length);
     bc[bc_ptr->length] = '\0';
