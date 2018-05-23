@@ -128,12 +128,6 @@ int process_certificate_input(const char *input_path){
     // need to process the input file to see if it is within another
     // folder -- if it is, we must get that path to the folder
     char *base_path = (char*)malloc(sizeof(char)*BUFFSZ);
-
-    if(base_path== NULL){
-        fprintf(stderr,"ERROR: Can't allocate memory\n");
-        exit(EXIT_FAILURE);
-    }
-
     if(strstr(input_path,"/")==NULL){
         // then we are opening a file in the directory that we are in
         //currently. Therefore we don't need to reconstruct a path,
@@ -150,14 +144,22 @@ int process_certificate_input(const char *input_path){
         memset(temp,0,BUFFSZ);
         strcpy(temp,input_path);
 
-        // tokenise the input path based on '/' to separate the base path from
         // need to find the last / in the relative path
         // the relative path
-        char *tk;
-        char *sv;
-        // first is the base path
-        tk = strtok_r(temp,"/",&sv);
-        strcpy(base_path,tk);
+
+        int last_slash_index;
+
+        // METHOD 2 -- this should handle nested paths not just a single path
+        for(int i = 0;i < strlen(temp);i++){
+            if(temp[i] == '/'){
+                last_slash_index = i;
+            }
+        }
+        // set the last slash to be '\0' -- terminate the string here
+        temp[last_slash_index] = '\0';
+
+        // copy it into the base path memory
+        strcpy(base_path,temp);
 
     }
 
