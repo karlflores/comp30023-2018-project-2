@@ -3,6 +3,7 @@
 
 #define SUCCESS 1
 #define FAILURE -1
+#define ERROR -1
 
 /**
 * Verify the certificate specificed by cert_path with url.

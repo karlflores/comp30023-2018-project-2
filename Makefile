@@ -4,7 +4,7 @@
 #                                                              #
 ################################################################
 CC = gcc
-CFLAGS = -Wall -std=c99
+CFLAGS = -Wall -std=c99 -g
 
 SRC1 = wildcards.c checkers.c main.c certificates.c helpers.c
 OBJ1 = wildcards.o checkers.o main.o certificates.o helpers.o

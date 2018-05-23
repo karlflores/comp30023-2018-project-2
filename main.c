@@ -6,8 +6,10 @@
 
 #define ARGC_SIZE 2
 
-
 /*
+* AUTHOR: KARL FLORES (760493)
+* LAST MODIFIED: 24/5/2018
+*
 * Main function -- implement the command line input
 */
 int main(int argc, char **argv){
@@ -27,7 +29,6 @@ int main(int argc, char **argv){
         fprintf(stderr, "ERROR: Can't process input file\n");
         return FAILURE;
     }
-
     // exit
     return SUCCESS;
 }

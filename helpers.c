@@ -7,7 +7,7 @@ char *reconstruct_full_path(const char *base_path, const char *relative_path){
     // add 1 due to the additon of the '/'
     length = strlen(base_path) + strlen(relative_path) + 1;
 
-    //allocate memory
+    //allocate memory - +1 for '\0'
     char *result = (char*)malloc(sizeof(char)*(length+1));
     if(result == NULL){
         fprintf(stderr,"ERROR: Could not allocate memory for full path\n");
@@ -28,7 +28,7 @@ char *reconstruct_full_path(const char *base_path, const char *relative_path){
 
     // add the relative path to the result string
     i = 0;
-    while(result[i] != '\0'){
+    while(relative_path[i] != '\0'){
         result[result_i++] = relative_path[i++];
     }
 
