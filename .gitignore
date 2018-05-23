@@ -21,3 +21,5 @@ sample_certs
 *.json
 certcheck
 test_wildcard
+testscript.sh
+*.sh
