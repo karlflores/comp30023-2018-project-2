@@ -120,12 +120,19 @@ int check_common_name(X509 *cert, const char *url){
             // need to check if it is equivalent to a SAN that is listed
             if(authenticated == FALSE){
                 authenticated = check_SAN(cert,url);
+                if(authenticated == NOT_FOUND){
+                    authenticated = FALSE;
+                }
             }
 
         }else{
             // if it is not a wild card -- then the CN does not match
             // we then need to check the SAN
             authenticated = check_SAN(cert,url);
+
+            if(authenticated == NOT_FOUND){
+                authenticated = FALSE;
+            }
         }
     }
 
@@ -273,8 +280,9 @@ int check_SAN(X509 *cert, const char *url){
     // get the location of the subject alternative names
     int SAN_loc = X509_get_ext_by_NID(cert, NID_subject_alt_name, -1);
     if(SAN_loc < 0){
-        fprintf(stderr,"ERROR: Can't locate Subject Alternative Name in Certificate\n");
-        return ERROR;
+        // Not all certificates contain the SAN FIELD
+        // fprintf(stderr,"ERROR: Can't locate Subject Alternative Name in Certificate\n");
+        return NOT_FOUND;
     }
     // get the string representing this extension
     char *SAN = get_extension_str(cert,SAN_loc);
@@ -282,6 +290,7 @@ int check_SAN(X509 *cert, const char *url){
         fprintf(stderr,"ERROR: Can't load Subject Alternative Name as string\n");
         return ERROR;
     }
+
     // now we need to tokenise the subject alternative name
     // get the first token of both the url and the wildcard
     char separator[3] = ", ";
