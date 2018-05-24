@@ -57,7 +57,7 @@ int check_common_name(X509 *cert, const char *url);
 * Check if the public key bit length satisfies the minimum length
 *
 * @param cert: X509 Certificate object to verify
-* @return: 1 - TRUE, 0 - FALSE
+* @return: 1 - TRUE, 0 - FALSE, ERROR -1, NOT_FOUND -2
 */
 int check_pubkey_length(X509 *cert);
 

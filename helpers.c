@@ -54,26 +54,20 @@ int compare_ASN1_TIMES(ASN1_TIME *from, ASN1_TIME *to){
 
     if(comp_day > 0 && comp_sec > 0){
         // then to time > from time
-        // printf("CERT DATE BEFORE\n");
         return LATER_TIME;
     }else if(comp_day < 0 && comp_sec < 0){
         // then to time < from time
-        // printf("CERT DATE AFTER\n");
         return EARLIER_TIME;
     }else if(comp_day == 0 && comp_sec > 0){
         // then to time > from time
-        // printf("CERT DATE BEFORE\n");
         return LATER_TIME;
     }else if(comp_day == 0 && comp_sec < 0){
         // then too time < from time
-        // printf("CERT DATE AFTER\n");
         return EARLIER_TIME;
     }else{
         // same time
-        // printf("SAME DAY\n");
         return SAME_TIME;
     }
-
 }
 
 // count the number of periods in a url

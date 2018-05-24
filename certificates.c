@@ -36,7 +36,8 @@ int verify_certificate(const char *cert_path, const char *url){
 
     // step through each of the checkers -- this prints to a debug file as well
     // as altering the authenticated flag
-
+    // we start with the authentication flag as being true -- if any one of the
+    // tests returns false, we change the flag to false
     if(check_not_before(cert) == TRUE){
         fprintf(debug,"NOT BEFORE:             TRUE\n");
     }else{
@@ -224,8 +225,6 @@ int process_certificate_input(const char *input_path){
 
         }
 
-
-
         //write result to the output file
         fprintf(output,"%s,%s,%d\n",cert_path,url,autheticated);
 
@@ -246,5 +245,4 @@ int process_certificate_input(const char *input_path){
 
     // if we reach here -- therefore we have read and processed all inputs
     return SUCCESS;
-
 }

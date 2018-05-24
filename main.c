@@ -22,7 +22,6 @@ int main(int argc, char **argv){
     // get the filepath of the input file from the input
     char file_path[BUFFSZ];
     strcpy(file_path, argv[1]);
-    // printf("INPUT: %s\n",file_path);
 
     // now process the input
     if(process_certificate_input(file_path) < 0){
