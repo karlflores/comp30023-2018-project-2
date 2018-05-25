@@ -24,4 +24,4 @@ test_wildcard
 testscript.sh
 *.sh
 *.crt
-sample_test_2
+sample_tests_2
